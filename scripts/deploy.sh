@@ -31,18 +31,6 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# Run tests
-echo "🧪 Running tests..."
-npm run test:run
-
-# Run linting
-echo "🔍 Running linting..."
-npm run lint
-
-# Run type checking
-echo "📝 Running type checking..."
-npm run check
-
 # Build the application
 echo "🏗️  Building application..."
 npm run build

@@ -1,0 +1,66 @@
+name: Test Suite
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_linting:
+        description: 'Run linting'
+        required: false
+        default: true
+        type: boolean
+      run_type_check:
+        description: 'Run type checking'
+        required: false
+        default: true
+        type: boolean
+      run_unit_tests:
+        description: 'Run unit tests'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run linting
+        if: ${{ github.event.inputs.run_linting == 'true' }}
+        run: |
+          echo "🔍 Running linting..."
+          npm run lint
+
+      - name: Run type checking
+        if: ${{ github.event.inputs.run_type_check == 'true' }}
+        run: |
+          echo "📝 Running type checking..."
+          npm run check
+
+      - name: Run unit tests
+        if: ${{ github.event.inputs.run_unit_tests == 'true' }}
+        run: |
+          echo "🧪 Running unit tests..."
+          npm run test:run
+
+      - name: Test summary
+        run: |
+          echo "✅ Test suite completed!"
+          echo "Linting: ${{ github.event.inputs.run_linting }}"
+          echo "Type checking: ${{ github.event.inputs.run_type_check }}"
+          echo "Unit tests: ${{ github.event.inputs.run_unit_tests }}"

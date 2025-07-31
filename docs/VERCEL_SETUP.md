@@ -21,7 +21,7 @@ This guide walks you through setting up Vercel deployment for the Business Match
    - **Root Directory**: `./` (leave as default)
    - **Build Command**: `npm run build`
    - **Output Directory**: `build`
-   - **Install Command**: `npm ci`
+   - **Install Command**: `npm install`
 
 ### Option B: Vercel CLI
 
@@ -78,7 +78,7 @@ In Vercel Dashboard > Settings > General:
 - **Node.js Version**: 20.x
 - **Build Command**: `npm run build`
 - **Output Directory**: `build`
-- **Install Command**: `npm ci`
+- **Install Command**: `npm install`
 - **Development Command**: `npm run dev`
 
 ### Function Configuration
