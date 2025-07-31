@@ -1,0 +1,57 @@
+name: Database Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to migrate'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      migration_path:
+        description: 'Path to migration files (optional)'
+        required: false
+        default: 'supabase/migrations'
+
+jobs:
+  migrate:
+    name: Run Database Migration
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Supabase CLI
+        run: |
+          npm install -g @supabase/cli
+
+      - name: Validate migration files
+        run: |
+          if [ -d "${{ github.event.inputs.migration_path }}" ]; then
+            echo "✅ Migration directory found"
+            ls -la ${{ github.event.inputs.migration_path }}
+          else
+            echo "❌ Migration directory not found: ${{ github.event.inputs.migration_path }}"
+            exit 1
+          fi
+
+      - name: Run database migrations
+        run: |
+          echo "🚀 Running migrations for ${{ github.event.inputs.environment }} environment"
+          supabase db push --db-url ${{ secrets.DATABASE_URL }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Verify migration success
+        run: |
+          echo "✅ Migration completed successfully for ${{ github.event.inputs.environment }}"

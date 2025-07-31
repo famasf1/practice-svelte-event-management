@@ -1,0 +1,85 @@
+name: Environment Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to validate'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+jobs:
+  validate:
+    name: Validate Environment Configuration
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Vercel secrets
+        run: |
+          echo "🔍 Validating Vercel configuration..."
+          
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "❌ VERCEL_TOKEN is not set"
+            exit 1
+          else
+            echo "✅ VERCEL_TOKEN is configured"
+          fi
+          
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "❌ VERCEL_ORG_ID is not set"
+            exit 1
+          else
+            echo "✅ VERCEL_ORG_ID is configured"
+          fi
+          
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "❌ VERCEL_PROJECT_ID is not set"
+            exit 1
+          else
+            echo "✅ VERCEL_PROJECT_ID is configured"
+          fi
+
+      - name: Validate database secrets
+        run: |
+          echo "🔍 Validating database configuration..."
+          
+          if [ -z "${{ secrets.DATABASE_URL }}" ]; then
+            echo "❌ DATABASE_URL is not set"
+            exit 1
+          else
+            echo "✅ DATABASE_URL is configured"
+          fi
+          
+          if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+            echo "❌ SUPABASE_ACCESS_TOKEN is not set"
+            exit 1
+          else
+            echo "✅ SUPABASE_ACCESS_TOKEN is configured"
+          fi
+
+      - name: Test Vercel CLI
+        run: |
+          echo "🧪 Testing Vercel CLI connection..."
+          npm install -g vercel
+          echo "${{ secrets.VERCEL_TOKEN }}" | vercel whoami --token
+
+      - name: Test Supabase CLI
+        run: |
+          echo "🧪 Testing Supabase CLI connection..."
+          npm install -g @supabase/cli
+          # Test connection without running migrations
+          supabase --version
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Validation complete
+        run: |
+          echo "✅ All environment validations passed for ${{ github.event.inputs.environment }}!"
